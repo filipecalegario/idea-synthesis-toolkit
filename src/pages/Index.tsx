@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { CombinationTable } from "@/components/CombinationTable";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Copy, ChevronUp, ChevronDown, Wand2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Category {
   name: string;
@@ -17,6 +19,23 @@ const Index = () => {
   const [isInputVisible, setIsInputVisible] = useState(true);
   const [isElaborating, setIsElaborating] = useState(false);
   const [elaboration, setElaboration] = useState<string>("");
+  const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check if the API key exists
+    const checkApiKey = async () => {
+      try {
+        const response = await fetch('/functions/v1/check-api-key');
+        const data = await response.json();
+        setHasApiKey(data.hasKey);
+      } catch (error) {
+        console.error('Error checking API key:', error);
+        setHasApiKey(false);
+      }
+    };
+    
+    checkApiKey();
+  }, []);
 
   const parseTextInput = (input: string) => {
     const lines = input.trim().split("\n");
@@ -120,6 +139,11 @@ const Index = () => {
       return;
     }
 
+    if (!hasApiKey) {
+      toast.error("Please set your OpenAI API key in the project settings first");
+      return;
+    }
+
     setIsElaborating(true);
     setElaboration("");
 
@@ -157,6 +181,14 @@ const Index = () => {
           <h1 className="text-4xl font-bold tracking-tight">Creative Combination Tool</h1>
           <p className="mt-2 text-muted-foreground">Create unique combinations from your categories and options</p>
         </div>
+
+        {hasApiKey === false && (
+          <Alert className="mb-4">
+            <AlertDescription>
+              To use the AI elaboration feature, please set your OpenAI API key in the project settings.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-8">
           <div className="space-y-4">
