@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from "react";
 import { CombinationTable } from "@/components/CombinationTable";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Copy, ChevronUp, ChevronDown, Wand2 } from "lucide-react";
+import { Copy, ChevronUp, ChevronDown, Wand2, Settings } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Link } from "react-router-dom";
 
 interface Category {
   name: string;
@@ -22,7 +22,6 @@ const Index = () => {
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if the API key exists
     const checkApiKey = async () => {
       try {
         const response = await fetch('/functions/v1/check-api-key');
@@ -177,9 +176,16 @@ const Index = () => {
         transition={{ duration: 0.5 }}
         className="space-y-8"
       >
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight">Creative Combination Tool</h1>
-          <p className="mt-2 text-muted-foreground">Create unique combinations from your categories and options</p>
+        <div className="flex items-center justify-between">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold tracking-tight">Creative Combination Tool</h1>
+            <p className="mt-2 text-muted-foreground">Create unique combinations from your categories and options</p>
+          </div>
+          <Link to="/project-settings">
+            <Button variant="outline" size="icon" className="ml-4">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
         {hasApiKey === false && (
