@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { CombinationTable } from "@/components/CombinationTable";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Copy, ChevronUp, ChevronDown } from "lucide-react";
+import { Copy, ChevronUp, ChevronDown, Wand2 } from "lucide-react";
 
 interface Category {
   name: string;
@@ -16,6 +15,8 @@ const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<number, number[]>>({});
   const [isInputVisible, setIsInputVisible] = useState(true);
+  const [isElaborating, setIsElaborating] = useState(false);
+  const [elaboration, setElaboration] = useState<string>("");
 
   const parseTextInput = (input: string) => {
     const lines = input.trim().split("\n");
@@ -71,10 +72,8 @@ const Index = () => {
       const selectionIndex = currentSelections.indexOf(optionIndex);
       
       if (selectionIndex === -1) {
-        // Add new selection
         newSelection[categoryIndex] = [...currentSelections, optionIndex];
       } else {
-        // Remove existing selection
         newSelection[categoryIndex] = currentSelections.filter(idx => idx !== optionIndex);
         if (newSelection[categoryIndex].length === 0) {
           delete newSelection[categoryIndex];
@@ -112,6 +111,38 @@ const Index = () => {
 
   const toggleInputVisibility = () => {
     setIsInputVisible(!isInputVisible);
+  };
+
+  const handleElaborate = async () => {
+    const combination = generateCombination();
+    if (!combination) {
+      toast.error("Please select options to elaborate on");
+      return;
+    }
+
+    setIsElaborating(true);
+    setElaboration("");
+
+    try {
+      const response = await fetch('/functions/v1/elaborate-combination', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ combination }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get elaboration');
+
+      const data = await response.json();
+      setElaboration(data.elaboration);
+      toast.success("Elaboration generated!");
+    } catch (error) {
+      console.error('Error elaborating combination:', error);
+      toast.error("Failed to elaborate on combination");
+    } finally {
+      setIsElaborating(false);
+    }
   };
 
   return (
@@ -179,7 +210,7 @@ CATEGORY 2: OPTION 2A, OPTION 2B, OPTION 2C"
           </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="rounded-lg border bg-card p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Generated Combination</h2>
             <div className="space-x-2">
@@ -192,7 +223,28 @@ CATEGORY 2: OPTION 2A, OPTION 2B, OPTION 2C"
               </Button>
             </div>
           </div>
-          <p className="mt-4 combination-text">{generateCombination() || "Select options to generate a combination"}</p>
+          <p className="combination-text">{generateCombination() || "Select options to generate a combination"}</p>
+          
+          <div className="pt-4 border-t">
+            <Button 
+              onClick={handleElaborate} 
+              disabled={isElaborating} 
+              className="w-full"
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              {isElaborating ? "Elaborating..." : "Elaborate with AI"}
+            </Button>
+            
+            {elaboration && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-secondary/50 rounded-lg"
+              >
+                <p className="text-base text-muted-foreground italic">{elaboration}</p>
+              </motion.div>
+            )}
+          </div>
         </div>
       </motion.div>
     </div>
