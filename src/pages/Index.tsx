@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { CombinationTable } from "@/components/CombinationTable";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Copy } from "lucide-react";
+import { Copy, ChevronUp, ChevronDown } from "lucide-react";
 
 interface Category {
   name: string;
@@ -15,6 +15,7 @@ const Index = () => {
   const [textInput, setTextInput] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<Record<number, number>>({});
+  const [isInputVisible, setIsInputVisible] = useState(true);
 
   const parseTextInput = (input: string) => {
     const lines = input.trim().split("\n");
@@ -91,6 +92,10 @@ const Index = () => {
     }
   };
 
+  const toggleInputVisibility = () => {
+    setIsInputVisible(!isInputVisible);
+  };
+
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <motion.div
@@ -104,19 +109,44 @@ const Index = () => {
           <p className="mt-2 text-muted-foreground">Create unique combinations from your categories and options</p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-8">
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Categories & Options</h2>
-            <div className="textarea-container">
-              <textarea
-                value={textInput}
-                onChange={handleTextChange}
-                placeholder="Enter categories and options in the format:
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Categories & Options</h2>
+              <Button variant="outline" size="sm" onClick={toggleInputVisibility}>
+                {isInputVisible ? (
+                  <>
+                    <ChevronUp className="mr-2 h-4 w-4" /> Hide Input
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="mr-2 h-4 w-4" /> Show Input
+                  </>
+                )}
+              </Button>
+            </div>
+            <AnimatePresence>
+              {isInputVisible && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <div className="textarea-container">
+                    <textarea
+                      value={textInput}
+                      onChange={handleTextChange}
+                      placeholder="Enter categories and options in the format:
 CATEGORY 1: OPTION 1A, OPTION 1B, OPTION 1C
 CATEGORY 2: OPTION 2A, OPTION 2B, OPTION 2C"
-                className="min-h-[400px]"
-              />
-            </div>
+                      className="min-h-[400px]"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="space-y-4">
