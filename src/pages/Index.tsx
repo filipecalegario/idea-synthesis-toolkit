@@ -14,7 +14,7 @@ interface Category {
 const Index = () => {
   const [textInput, setTextInput] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<Record<number, number>>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<number, number[]>>({});
   const [isInputVisible, setIsInputVisible] = useState(true);
 
   const parseTextInput = (input: string) => {
@@ -63,18 +63,36 @@ const Index = () => {
   const handleOptionSelect = (categoryIndex: number, optionIndex: number) => {
     setSelectedOptions((prev) => {
       const newSelection = { ...prev };
-      if (newSelection[categoryIndex] === optionIndex) {
-        delete newSelection[categoryIndex];
-      } else {
-        newSelection[categoryIndex] = optionIndex;
+      if (!newSelection[categoryIndex]) {
+        newSelection[categoryIndex] = [];
       }
+      
+      const currentSelections = newSelection[categoryIndex];
+      const selectionIndex = currentSelections.indexOf(optionIndex);
+      
+      if (selectionIndex === -1) {
+        // Add new selection
+        newSelection[categoryIndex] = [...currentSelections, optionIndex];
+      } else {
+        // Remove existing selection
+        newSelection[categoryIndex] = currentSelections.filter(idx => idx !== optionIndex);
+        if (newSelection[categoryIndex].length === 0) {
+          delete newSelection[categoryIndex];
+        }
+      }
+      
       return newSelection;
     });
   };
 
   const generateCombination = () => {
     return categories
-      .map((cat, index) => selectedOptions[index] !== undefined && cat.options[selectedOptions[index]])
+      .map((cat, index) => {
+        const selectedIndices = selectedOptions[index] || [];
+        return selectedIndices.length > 0
+          ? selectedIndices.map(idx => cat.options[idx]).join(" & ")
+          : null;
+      })
       .filter(Boolean)
       .join(" + ");
   };

@@ -9,7 +9,7 @@ interface CombinationTableProps {
   }>;
   onCategoryEdit: (index: number, newName: string) => void;
   onOptionEdit: (categoryIndex: number, optionIndex: number, newValue: string) => void;
-  selectedOptions: Record<number, number>;
+  selectedOptions: Record<number, number[]>;
   onOptionSelect: (categoryIndex: number, optionIndex: number) => void;
 }
 
@@ -60,7 +60,7 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                 )}
               </td>
               {category.options.map((option, optionIndex) => {
-                const isSelected = selectedOptions[categoryIndex] === optionIndex;
+                const isSelected = selectedOptions[categoryIndex]?.includes(optionIndex);
                 return (
                   <td
                     key={optionIndex}
