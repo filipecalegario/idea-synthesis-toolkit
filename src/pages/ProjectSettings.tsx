@@ -21,16 +21,12 @@ const ProjectSettings = () => {
         throw new Error('No session found');
       }
 
-      const response = await fetch('/functions/v1/set-api-key', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ apiKey }),
+      // Use Supabase functions.invoke instead of fetch
+      const { data, error } = await supabase.functions.invoke('set-api-key', {
+        body: { apiKey }
       });
 
-      if (!response.ok) throw new Error('Failed to set API key');
+      if (error) throw error;
 
       toast.success("API key saved successfully!");
       setApiKey("");
