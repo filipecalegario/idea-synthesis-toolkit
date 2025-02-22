@@ -8,49 +8,51 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
+    // Create a Supabase client with the service role key
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get all edge function secrets
-    const { data: secrets, error: secretsError } = await supabaseClient
-      .from('secrets')
-      .select('name, value')
-
-    if (secretsError) {
-      console.error('Error fetching secrets:', secretsError)
-      throw secretsError
+    // Get the authorization header from the request
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader) {
+      throw new Error('No authorization header')
     }
 
-    // Check if OPENAI_API_KEY exists in secrets
-    const hasKey = secrets.some(secret => secret.name === 'OPENAI_API_KEY' && secret.value)
+    // Get the JWT token
+    const token = authHeader.replace('Bearer ', '')
+
+    // Get the user from the JWT token
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
+    if (userError || !user) throw new Error('Invalid user token')
+
+    // Check if the user has an API key stored
+    const { data, error } = await supabaseClient
+      .from('secrets')
+      .select('key_value')
+      .eq('user_id', user.id)
+      .eq('key_name', 'OPENAI_API_KEY')
+      .single()
+
+    const hasKey = Boolean(data?.key_value)
 
     return new Response(
       JSON.stringify({ hasKey }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     console.error('Error in check-api-key function:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ hasKey: false, error: error.message }),
       { 
         status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
   }

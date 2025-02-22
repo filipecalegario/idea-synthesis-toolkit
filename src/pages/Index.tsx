@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { CombinationTable } from "@/components/CombinationTable";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { toast } from "sonner";
 import { Copy, ChevronUp, ChevronDown, Wand2, Settings } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Category {
   name: string;
@@ -24,8 +26,14 @@ const Index = () => {
   useEffect(() => {
     const checkApiKey = async () => {
       try {
-        const response = await fetch('/functions/v1/check-api-key');
-        const data = await response.json();
+        const { data: { session }} = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          throw new Error('No session found');
+        }
+
+        // Use Supabase functions.invoke instead of fetch
+        const { data, error } = await supabase.functions.invoke('check-api-key');
+        if (error) throw error;
         setHasApiKey(data.hasKey);
       } catch (error) {
         console.error('Error checking API key:', error);
