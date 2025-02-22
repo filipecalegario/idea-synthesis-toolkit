@@ -37,11 +37,35 @@ serve(async (req) => {
 
     // Get request body
     const { apiKey } = await req.json()
+
+    if (apiKey === null) {
+      // Handle delete operation
+      const { error: deleteError } = await supabase
+        .from('secrets')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('key_name', 'OPENAI_API_KEY')
+
+      if (deleteError) {
+        console.error('Error deleting API key:', deleteError)
+        throw deleteError
+      }
+
+      return new Response(
+        JSON.stringify({ message: 'API key deleted successfully' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      )
+    }
+
+    // For non-delete operations, validate API key
     if (!apiKey) {
       throw new Error('API key is required')
     }
 
-    // Store the API key in the secrets table
+    // Store or update the API key in the secrets table
     const { error: insertError } = await supabase
       .from('secrets')
       .upsert(
@@ -73,8 +97,9 @@ serve(async (req) => {
       JSON.stringify({ error: error.message }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 400
       }
     )
   }
 })
+
