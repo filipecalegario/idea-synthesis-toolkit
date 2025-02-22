@@ -139,11 +139,13 @@ const Index = () => {
         </div>
 
         {hasApiKey === false && (
-          <Alert className="mb-4">
-            <AlertDescription>
-              To use the AI elaboration feature, please set your OpenAI API key in the project settings.
-            </AlertDescription>
-          </Alert>
+          <div className="mb-4">
+            <Alert className="bg-red-50">
+              <AlertDescription>
+                To use the AI elaboration feature, please set your OpenAI API key in the project settings.
+              </AlertDescription>
+            </Alert>
+          </div>
         )}
 
         <div className="grid gap-8">
