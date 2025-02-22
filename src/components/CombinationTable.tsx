@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 interface CombinationTableProps {
@@ -21,37 +21,29 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
   onOptionSelect,
 }) => {
   const [editingCell, setEditingCell] = useState<{ type: "category" | "option"; indices: number[] } | null>(null);
-  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [isDoubleClickPending, setIsDoubleClickPending] = useState(false);
+  const [lastClickTime, setLastClickTime] = useState(0);
 
-  const handleDoubleClick = (type: "category" | "option", indices: number[], e: React.MouseEvent) => {
+  const handleCellInteraction = (
+    type: "category" | "option",
+    categoryIndex: number,
+    optionIndex: number | null,
+    e: React.MouseEvent
+  ) => {
     e.preventDefault();
-    e.stopPropagation();
-    setIsDoubleClickPending(false);
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current);
-      clickTimeoutRef.current = null;
+    const currentTime = new Date().getTime();
+    const isDoubleClick = currentTime - lastClickTime < 300;
+    setLastClickTime(currentTime);
+
+    if (isDoubleClick) {
+      // Handle double-click (edit mode)
+      setEditingCell({
+        type,
+        indices: optionIndex !== null ? [categoryIndex, optionIndex] : [categoryIndex],
+      });
+    } else if (type === "option" && optionIndex !== null && !editingCell) {
+      // Handle single-click (selection) only for options and when not in edit mode
+      onOptionSelect(categoryIndex, optionIndex);
     }
-    setEditingCell({ type, indices });
-  };
-
-  const handleClick = (categoryIndex: number, optionIndex: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isDoubleClickPending) return;
-
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current);
-      clickTimeoutRef.current = null;
-    }
-
-    clickTimeoutRef.current = setTimeout(() => {
-      if (!isDoubleClickPending) {
-        onOptionSelect(categoryIndex, optionIndex);
-      }
-      setIsDoubleClickPending(false);
-    }, 200);
-
-    setIsDoubleClickPending(true);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -73,7 +65,7 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
             <tr key={categoryIndex} className="border-b last:border-0">
               <td
                 className="border-r p-3 font-medium editable-cell"
-                onDoubleClick={(e) => handleDoubleClick("category", [categoryIndex], e)}
+                onClick={(e) => handleCellInteraction("category", categoryIndex, null, e)}
               >
                 {editingCell?.type === "category" && editingCell.indices[0] === categoryIndex ? (
                   <input
@@ -82,6 +74,7 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                     onBlur={handleBlur}
                     className="w-full bg-transparent p-1 outline-none"
                     onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                    onClick={(e) => e.stopPropagation()}
                   />
                 ) : (
                   category.name
@@ -99,10 +92,7 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                   >
                     <div
                       className="cursor-pointer"
-                      onClick={(e) => handleClick(categoryIndex, optionIndex, e)}
-                      onDoubleClick={(e) => {
-                        handleDoubleClick("option", [categoryIndex, optionIndex], e);
-                      }}
+                      onClick={(e) => handleCellInteraction("option", categoryIndex, optionIndex, e)}
                     >
                       {editingCell?.type === "option" &&
                       editingCell.indices[0] === categoryIndex &&
@@ -113,6 +103,7 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                           onBlur={handleBlur}
                           className="w-full bg-transparent p-1 text-center outline-none"
                           onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
                         <motion.div
