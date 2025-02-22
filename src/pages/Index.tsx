@@ -120,7 +120,7 @@ const Index = () => {
 
   return (
     <>
-      <Toaster richColors position="top-center" />
+      <Toaster richColors position="bottom-right" />
       <div className="container mx-auto max-w-6xl px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
