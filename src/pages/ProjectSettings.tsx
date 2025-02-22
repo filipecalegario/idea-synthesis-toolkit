@@ -1,16 +1,34 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut, Pencil, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ProjectSettings = () => {
   const [apiKey, setApiKey] = useState("");
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    checkApiKey();
+  }, []);
+
+  const checkApiKey = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-api-key');
+      if (error) throw error;
+      setHasApiKey(data.hasKey);
+    } catch (error) {
+      console.error('Error checking API key:', error);
+      toast.error("Failed to check API key status");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,18 +39,37 @@ const ProjectSettings = () => {
         throw new Error('No session found');
       }
 
-      // Use Supabase functions.invoke instead of fetch
       const { data, error } = await supabase.functions.invoke('set-api-key', {
         body: { apiKey }
       });
 
       if (error) throw error;
 
-      toast.success("API key saved successfully!");
+      toast.success(isEditing ? "API key updated successfully!" : "API key saved successfully!");
       setApiKey("");
+      setIsEditing(false);
+      setHasApiKey(true);
     } catch (error) {
       console.error('Error setting API key:', error);
       toast.error("Failed to save API key");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase.functions.invoke('set-api-key', {
+        body: { apiKey: null }
+      });
+
+      if (error) throw error;
+
+      toast.success("API key deleted successfully!");
+      setHasApiKey(false);
+      setIsEditing(false);
+      setApiKey("");
+    } catch (error) {
+      console.error('Error deleting API key:', error);
+      toast.error("Failed to delete API key");
     }
   };
 
@@ -80,20 +117,55 @@ const ProjectSettings = () => {
         <div className="space-y-6">
           <div className="rounded-lg border bg-card p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-4">OpenAI API Key</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Input
-                  type="password"
-                  placeholder="Enter your OpenAI API key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Your API key is stored securely and used for AI elaboration features.
-                </p>
+            
+            {hasApiKey && !isEditing && (
+              <div className="space-y-4">
+                <Alert>
+                  <AlertDescription>
+                    Your OpenAI API key is securely stored. You can edit or delete it using the buttons below.
+                  </AlertDescription>
+                </Alert>
+                <div className="flex gap-2">
+                  <Button onClick={() => setIsEditing(true)}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit API Key
+                  </Button>
+                  <Button variant="destructive" onClick={handleDelete}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete API Key
+                  </Button>
+                </div>
               </div>
-              <Button type="submit">Save API Key</Button>
-            </form>
+            )}
+
+            {(!hasApiKey || isEditing) && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Input
+                    type="password"
+                    placeholder="Enter your OpenAI API key"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Your API key is stored securely and used for AI elaboration features.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="submit">
+                    {isEditing ? "Update API Key" : "Save API Key"}
+                  </Button>
+                  {isEditing && (
+                    <Button type="button" variant="outline" onClick={() => {
+                      setIsEditing(false);
+                      setApiKey("");
+                    }}>
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </motion.div>
