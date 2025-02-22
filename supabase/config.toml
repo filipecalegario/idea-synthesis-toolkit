@@ -1,3 +1,5 @@
 
 project_id = "efwprcstgmtwqoecqfpn"
 
+[functions.set-api-key]
+verify_jwt = true
