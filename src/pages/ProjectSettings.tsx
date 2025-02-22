@@ -16,10 +16,16 @@ const ProjectSettings = () => {
     e.preventDefault();
     
     try {
+      const { data: { session }} = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No session found');
+      }
+
       const response = await fetch('/functions/v1/set-api-key', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ apiKey }),
       });
