@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Check } from "lucide-react";
 
 interface CombinationTableProps {
   categories: Array<{
@@ -17,10 +17,6 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
   selectedOptions,
   onOptionSelect,
 }) => {
-  const handleCheckboxChange = (categoryIndex: number, optionIndex: number, checked: boolean) => {
-    onOptionSelect(categoryIndex, optionIndex);
-  };
-
   return (
     <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
       <table className="w-full">
@@ -35,18 +31,19 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                 return (
                   <td
                     key={optionIndex}
-                    className={`relative p-3 text-center transition-all duration-200 ${
-                      isSelected ? "cell-selected" : ""
+                    onClick={() => onOptionSelect(categoryIndex, optionIndex)}
+                    className={`relative p-3 text-center transition-all duration-200 cursor-pointer hover:bg-accent ${
+                      isSelected ? "bg-primary/10" : ""
                     }`}
                     style={{ width: `${100 / category.options.length}%` }}
                   >
-                    <div className="absolute right-1 top-1">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) => handleCheckboxChange(categoryIndex, optionIndex, checked as boolean)}
-                        className="hover:border-primary"
-                      />
-                    </div>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: isSelected ? 1 : 0 }}
+                      className="absolute right-2 top-2"
+                    >
+                      <Check className="h-4 w-4 text-primary" />
+                    </motion.div>
                     <motion.div
                       initial={{ scale: 1 }}
                       whileHover={{ scale: 1.02 }}
