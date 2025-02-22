@@ -63,5 +63,5 @@
 
 .textarea-container textarea {
   @apply block w-full resize-none border-0 bg-transparent p-4 text-base placeholder:text-muted-foreground focus-visible:ring-0;
-  min-height: 400px;
+  overflow-y: hidden;
 }

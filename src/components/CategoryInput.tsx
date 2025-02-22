@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,12 +45,26 @@ export const CategoryInput: React.FC<CategoryInputProps> = ({
   onTextChange,
   onToggleVisibility,
 }) => {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
   const handleExampleClick = (example: string) => {
     const syntheticEvent = {
       target: { value: example }
     } as React.ChangeEvent<HTMLTextAreaElement>;
     onTextChange(syntheticEvent);
   };
+
+  const adjustTextAreaHeight = () => {
+    const textarea = textAreaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextAreaHeight();
+  }, [textInput, isInputVisible]);
 
   return (
     <div className="space-y-4">
@@ -102,12 +116,16 @@ export const CategoryInput: React.FC<CategoryInputProps> = ({
           >
             <div className="textarea-container">
               <textarea
+                ref={textAreaRef}
                 value={textInput}
-                onChange={onTextChange}
+                onChange={(e) => {
+                  onTextChange(e);
+                  adjustTextAreaHeight();
+                }}
                 placeholder={`Enter categories and options in the format:
 CATEGORY 1: OPTION 1A, OPTION 1B, OPTION 1C
 CATEGORY 2: OPTION 2A, OPTION 2B, OPTION 2C`}
-                className="min-h-[400px] w-full p-4 border rounded-md resize-y"
+                className="min-h-[100px] w-full p-4 border rounded-md resize-none"
               />
             </div>
           </motion.div>
