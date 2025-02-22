@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface CombinationTableProps {
@@ -21,9 +21,37 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
   onOptionSelect,
 }) => {
   const [editingCell, setEditingCell] = useState<{ type: "category" | "option"; indices: number[] } | null>(null);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isDoubleClickPending, setIsDoubleClickPending] = useState(false);
 
-  const handleDoubleClick = (type: "category" | "option", indices: number[]) => {
+  const handleDoubleClick = (type: "category" | "option", indices: number[], e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDoubleClickPending(false);
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+    }
     setEditingCell({ type, indices });
+  };
+
+  const handleClick = (categoryIndex: number, optionIndex: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDoubleClickPending) return;
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+    }
+
+    clickTimeoutRef.current = setTimeout(() => {
+      if (!isDoubleClickPending) {
+        onOptionSelect(categoryIndex, optionIndex);
+      }
+      setIsDoubleClickPending(false);
+    }, 200);
+
+    setIsDoubleClickPending(true);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -45,7 +73,7 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
             <tr key={categoryIndex} className="border-b last:border-0">
               <td
                 className="border-r p-3 font-medium editable-cell"
-                onDoubleClick={() => handleDoubleClick("category", [categoryIndex])}
+                onDoubleClick={(e) => handleDoubleClick("category", [categoryIndex], e)}
               >
                 {editingCell?.type === "category" && editingCell.indices[0] === categoryIndex ? (
                   <input
@@ -71,10 +99,9 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                   >
                     <div
                       className="cursor-pointer"
-                      onClick={() => onOptionSelect(categoryIndex, optionIndex)}
+                      onClick={(e) => handleClick(categoryIndex, optionIndex, e)}
                       onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        handleDoubleClick("option", [categoryIndex, optionIndex]);
+                        handleDoubleClick("option", [categoryIndex, optionIndex], e);
                       }}
                     >
                       {editingCell?.type === "option" &&
