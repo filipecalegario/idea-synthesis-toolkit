@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CombinationTableProps {
   categories: Array<{
@@ -21,29 +22,18 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
   onOptionSelect,
 }) => {
   const [editingCell, setEditingCell] = useState<{ type: "category" | "option"; indices: number[] } | null>(null);
-  const [lastClickTime, setLastClickTime] = useState(0);
 
-  const handleCellInteraction = (
+  const handleCellDoubleClick = (
     type: "category" | "option",
     categoryIndex: number,
     optionIndex: number | null,
     e: React.MouseEvent
   ) => {
     e.preventDefault();
-    const currentTime = new Date().getTime();
-    const isDoubleClick = currentTime - lastClickTime < 300;
-    setLastClickTime(currentTime);
-
-    if (isDoubleClick) {
-      // Handle double-click (edit mode)
-      setEditingCell({
-        type,
-        indices: optionIndex !== null ? [categoryIndex, optionIndex] : [categoryIndex],
-      });
-    } else if (type === "option" && optionIndex !== null && !editingCell) {
-      // Handle single-click (selection) only for options and when not in edit mode
-      onOptionSelect(categoryIndex, optionIndex);
-    }
+    setEditingCell({
+      type,
+      indices: optionIndex !== null ? [categoryIndex, optionIndex] : [categoryIndex],
+    });
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -65,7 +55,7 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
             <tr key={categoryIndex} className="border-b last:border-0">
               <td
                 className="border-r p-3 font-medium editable-cell"
-                onClick={(e) => handleCellInteraction("category", categoryIndex, null, e)}
+                onDoubleClick={(e) => handleCellDoubleClick("category", categoryIndex, null, e)}
               >
                 {editingCell?.type === "category" && editingCell.indices[0] === categoryIndex ? (
                   <input
@@ -74,7 +64,6 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                     onBlur={handleBlur}
                     className="w-full bg-transparent p-1 outline-none"
                     onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-                    onClick={(e) => e.stopPropagation()}
                   />
                 ) : (
                   category.name
@@ -85,14 +74,18 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                 return (
                   <td
                     key={optionIndex}
-                    className={`relative p-3 text-center transition-all duration-200 editable-cell ${
-                      isSelected ? "cell-selected" : ""
-                    }`}
+                    className={`relative p-3 text-center transition-all duration-200 editable-cell`}
                     style={{ width: `${100 / category.options.length}%` }}
                   >
+                    <div className="absolute right-1 top-1">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => onOptionSelect(categoryIndex, optionIndex)}
+                      />
+                    </div>
                     <div
-                      className="cursor-pointer"
-                      onClick={(e) => handleCellInteraction("option", categoryIndex, optionIndex, e)}
+                      className="cursor-text"
+                      onDoubleClick={(e) => handleCellDoubleClick("option", categoryIndex, optionIndex, e)}
                     >
                       {editingCell?.type === "option" &&
                       editingCell.indices[0] === categoryIndex &&
@@ -103,7 +96,6 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                           onBlur={handleBlur}
                           className="w-full bg-transparent p-1 text-center outline-none"
                           onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-                          onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
                         <motion.div
