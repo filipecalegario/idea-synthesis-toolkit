@@ -51,25 +51,6 @@ const Index = () => {
     setTextInput(e.target.value);
   };
 
-  const handleCategoryEdit = (index: number, newName: string) => {
-    const newCategories = [...categories];
-    newCategories[index].name = newName;
-    setCategories(newCategories);
-    updateTextArea(newCategories);
-  };
-
-  const handleOptionEdit = (categoryIndex: number, optionIndex: number, newValue: string) => {
-    const newCategories = [...categories];
-    newCategories[categoryIndex].options[optionIndex] = newValue;
-    setCategories(newCategories);
-    updateTextArea(newCategories);
-  };
-
-  const updateTextArea = (cats: Category[]) => {
-    const text = cats.map((cat) => `${cat.name}: ${cat.options.join(", ")}`).join("\n");
-    setTextInput(text);
-  };
-
   const handleOptionSelect = (categoryIndex: number, optionIndex: number) => {
     setSelectedOptions((prev) => {
       const newSelection = { ...prev };
@@ -177,8 +158,6 @@ const Index = () => {
             <h2 className="text-lg font-semibold">Combination Table</h2>
             <CombinationTable
               categories={categories}
-              onCategoryEdit={handleCategoryEdit}
-              onOptionEdit={handleOptionEdit}
               selectedOptions={selectedOptions}
               onOptionSelect={handleOptionSelect}
             />
