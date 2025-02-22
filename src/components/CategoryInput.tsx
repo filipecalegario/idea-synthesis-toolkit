@@ -92,9 +92,7 @@ export const CategoryInput: React.FC<CategoryInputProps> = ({
                 value={textInput}
                 onChange={onTextChange}
                 placeholder={`Enter categories and options in the format:
-
 CATEGORY 1: OPTION 1A, OPTION 1B, OPTION 1C
-
 CATEGORY 2: OPTION 2A, OPTION 2B, OPTION 2C`}
                 className="min-h-[400px] w-full p-4 border rounded-md resize-y"
               />
