@@ -11,12 +11,35 @@ interface CategoryInputProps {
   onToggleVisibility: () => void;
 }
 
+const EXAMPLE_1 = `INSTRUMENT TYPE: STRING, WIND, PERCUSSION
+CONTROL GESTURE: PLUCKING, BOWING, STRIKING
+MATERIAL: WOOD, METAL, SYNTHETIC
+MUSICAL CONTEXT: CLASSICAL, JAZZ, FOLK`;
+
+const EXAMPLE_2 = `INSTRUMENT TYPE: ELECTRONIC, PERCUSSION, WIND
+INTERACTION METHOD: HANDS, FEET, BODY MOVEMENT
+POSTURE: SEATED, STANDING, MOVING
+SOUND MODULATION: PITCH BENDING, VIBRATO, DYNAMICS CONTROL`;
+
+const EXAMPLE_3 = `MATERIAL: WOOD, METAL, SYNTHETIC, MIXED
+CONTROL GESTURE: PLUCKING, BOWING, STRIKING, BLOWING
+SOUND MODULATION: FILTERING, VIBRATO, PITCH BENDING
+MUSICAL CONTEXT: ELECTRONIC, ROCK, JAZZ, CLASSICAL`;
+
 export const CategoryInput: React.FC<CategoryInputProps> = ({
   textInput,
   isInputVisible,
   onTextChange,
   onToggleVisibility,
 }) => {
+  const handleExampleClick = (example: string) => {
+    // Create a synthetic event that mimics the textarea onChange event
+    const syntheticEvent = {
+      target: { value: example }
+    } as React.ChangeEvent<HTMLTextAreaElement>;
+    onTextChange(syntheticEvent);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -31,6 +54,29 @@ export const CategoryInput: React.FC<CategoryInputProps> = ({
               <ChevronDown className="mr-2 h-4 w-4" /> Show Input
             </>
           )}
+        </Button>
+      </div>
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleExampleClick(EXAMPLE_1)}
+        >
+          Example 1: Basic Instruments
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleExampleClick(EXAMPLE_2)}
+        >
+          Example 2: Interactive Design
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleExampleClick(EXAMPLE_3)}
+        >
+          Example 3: Modern Instruments
         </Button>
       </div>
       <AnimatePresence>
