@@ -74,21 +74,21 @@ export const CategoryInput: React.FC<CategoryInputProps> = ({
           size="sm"
           onClick={() => handleExampleClick(EXAMPLE_1)}
         >
-          Example 1: Basic Instruments
+          Example 1: Forklifts
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => handleExampleClick(EXAMPLE_2)}
         >
-          Example 2: Interactive Design
+          Example 2: Musical Instruments
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => handleExampleClick(EXAMPLE_3)}
         >
-          Example 3: Modern Instruments
+          Example 3: LLM-based Apps
         </Button>
       </div>
       <AnimatePresence>
