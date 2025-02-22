@@ -13,11 +13,20 @@ const ProjectSettings = () => {
   const [apiKey, setApiKey] = useState("");
   const [hasApiKey, setHasApiKey] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     checkApiKey();
+    getUserEmail();
   }, []);
+
+  const getUserEmail = async () => {
+    const { data: { session }} = await supabase.auth.getSession();
+    if (session?.user?.email) {
+      setUserEmail(session.user.email);
+    }
+  };
 
   const checkApiKey = async () => {
     try {
@@ -102,7 +111,9 @@ const ProjectSettings = () => {
             </Link>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
-              <p className="text-muted-foreground">Configure your project settings</p>
+              <p className="text-muted-foreground">
+                {userEmail ? `Logged in as ${userEmail}` : 'Loading...'}
+              </p>
             </div>
           </div>
           <Button 
