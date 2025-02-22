@@ -74,7 +74,9 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                 return (
                   <td
                     key={optionIndex}
-                    className={`relative p-3 text-center transition-all duration-200 editable-cell`}
+                    className={`relative p-3 text-center transition-all duration-200 editable-cell ${
+                      isSelected ? "cell-selected" : ""
+                    }`}
                     style={{ width: `${100 / category.options.length}%` }}
                   >
                     <div className="absolute right-1 top-1">
@@ -117,3 +119,4 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
     </div>
   );
 };
+
