@@ -120,7 +120,7 @@ const ProjectSettings = () => {
             
             {hasApiKey && !isEditing && (
               <div className="space-y-4">
-                <Alert>
+                <Alert className="bg-[#F2FCE2]">
                   <AlertDescription>
                     Your OpenAI API key is securely stored. You can edit or delete it using the buttons below.
                   </AlertDescription>
