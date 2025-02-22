@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProjectSettings = () => {
   const [apiKey, setApiKey] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +34,18 @@ const ProjectSettings = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success("Signed out successfully");
+      navigate("/auth");
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error("Failed to sign out");
+    }
+  };
+
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
       <motion.div
@@ -40,16 +54,25 @@ const ProjectSettings = () => {
         transition={{ duration: 0.5 }}
         className="space-y-8"
       >
-        <div className="flex items-center gap-4">
-          <Link to="/">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
-            <p className="text-muted-foreground">Configure your project settings</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
+              <p className="text-muted-foreground">Configure your project settings</p>
+            </div>
           </div>
+          <Button 
+            variant="outline" 
+            onClick={handleSignOut}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
 
         <div className="space-y-6">
