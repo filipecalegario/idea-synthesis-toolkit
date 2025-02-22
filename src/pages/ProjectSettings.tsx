@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { motion } from "framer-motion";
 import { ArrowLeft, LogOut, Pencil, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -84,8 +84,7 @@ const ProjectSettings = () => {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await supabase.auth.signOut();
       toast.success("Signed out successfully");
       navigate("/auth");
     } catch (error) {
@@ -95,92 +94,95 @@ const ProjectSettings = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-8"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
-              <p className="text-muted-foreground">
-                {userEmail ? `Logged in as ${userEmail}` : 'Loading...'}
-              </p>
+    <>
+      <Toaster richColors position="top-center" />
+      <div className="container mx-auto max-w-2xl px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-8"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
+                <p className="text-muted-foreground">
+                  {userEmail ? `Logged in as ${userEmail}` : 'Loading...'}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+
+          <div className="space-y-6">
+            <div className="rounded-lg border bg-card p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">OpenAI API Key</h2>
+              
+              {hasApiKey && !isEditing && (
+                <div className="space-y-4">
+                  <Alert className="bg-[#F2FCE2]">
+                    <AlertDescription>
+                      Your OpenAI API key is securely stored. You can edit or delete it using the buttons below.
+                    </AlertDescription>
+                  </Alert>
+                  <div className="flex gap-2">
+                    <Button onClick={() => setIsEditing(true)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit API Key
+                    </Button>
+                    <Button variant="destructive" onClick={handleDelete}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete API Key
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {(!hasApiKey || isEditing) && (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Input
+                      type="password"
+                      placeholder="Enter your OpenAI API key"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Your API key is stored securely and used for AI elaboration features.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="submit">
+                      {isEditing ? "Update API Key" : "Save API Key"}
+                    </Button>
+                    {isEditing && (
+                      <Button type="button" variant="outline" onClick={() => {
+                        setIsEditing(false);
+                        setApiKey("");
+                      }}>
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              )}
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleSignOut}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">OpenAI API Key</h2>
-            
-            {hasApiKey && !isEditing && (
-              <div className="space-y-4">
-                <Alert className="bg-[#F2FCE2]">
-                  <AlertDescription>
-                    Your OpenAI API key is securely stored. You can edit or delete it using the buttons below.
-                  </AlertDescription>
-                </Alert>
-                <div className="flex gap-2">
-                  <Button onClick={() => setIsEditing(true)}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit API Key
-                  </Button>
-                  <Button variant="destructive" onClick={handleDelete}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete API Key
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {(!hasApiKey || isEditing) && (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Input
-                    type="password"
-                    placeholder="Enter your OpenAI API key"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Your API key is stored securely and used for AI elaboration features.
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button type="submit">
-                    {isEditing ? "Update API Key" : "Save API Key"}
-                  </Button>
-                  {isEditing && (
-                    <Button type="button" variant="outline" onClick={() => {
-                      setIsEditing(false);
-                      setApiKey("");
-                    }}>
-                      Cancel
-                    </Button>
-                  )}
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </>
   );
 };
 

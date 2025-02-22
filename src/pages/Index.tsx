@@ -4,7 +4,7 @@ import { CombinationTable } from "@/components/CombinationTable";
 import { CategoryInput } from "@/components/CategoryInput";
 import { CombinationDisplay } from "@/components/CombinationDisplay";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -119,64 +119,67 @@ const Index = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-8"
-      >
-        <div className="flex items-center justify-between">
-          <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold tracking-tight">Creative Combination Tool</h1>
-            <p className="mt-2 text-muted-foreground">Create unique combinations from your categories and options</p>
+    <>
+      <Toaster richColors position="top-center" />
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-8"
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-center flex-1">
+              <h1 className="text-4xl font-bold tracking-tight">Creative Combination Tool</h1>
+              <p className="mt-2 text-muted-foreground">Create unique combinations from your categories and options</p>
+            </div>
+            <Link to="/project-settings">
+              <Button variant="outline" size="icon" className="ml-4">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
-          <Link to="/project-settings">
-            <Button variant="outline" size="icon" className="ml-4">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
 
-        {hasApiKey === false && (
-          <div className="mb-4">
-            <Alert className="bg-red-50">
-              <AlertDescription>
-                To use the AI elaboration feature, please set your OpenAI API key in the project settings.
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
+          {hasApiKey === false && (
+            <div className="mb-4">
+              <Alert className="bg-red-50">
+                <AlertDescription>
+                  To use the AI elaboration feature, please set your OpenAI API key in the project settings.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
 
-        <div className="grid gap-8">
-          <CategoryInput
-            textInput={textInput}
-            isInputVisible={isInputVisible}
-            onTextChange={handleTextChange}
-            onToggleVisibility={() => setIsInputVisible(!isInputVisible)}
-          />
-
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Combination Table</h2>
-            <CombinationTable
-              categories={categories}
-              selectedOptions={selectedOptions}
-              onOptionSelect={handleOptionSelect}
+          <div className="grid gap-8">
+            <CategoryInput
+              textInput={textInput}
+              isInputVisible={isInputVisible}
+              onTextChange={handleTextChange}
+              onToggleVisibility={() => setIsInputVisible(!isInputVisible)}
             />
-          </div>
-        </div>
 
-        <CombinationDisplay
-          combination={generateCombination(categories, selectedOptions)}
-          elaboration={elaboration}
-          isElaborating={isElaborating}
-          hasApiKey={hasApiKey}
-          onClear={handleClear}
-          onCopy={handleCopy}
-          onElaborate={handleElaborate}
-        />
-      </motion.div>
-    </div>
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Combination Table</h2>
+              <CombinationTable
+                categories={categories}
+                selectedOptions={selectedOptions}
+                onOptionSelect={handleOptionSelect}
+              />
+            </div>
+          </div>
+
+          <CombinationDisplay
+            combination={generateCombination(categories, selectedOptions)}
+            elaboration={elaboration}
+            isElaborating={isElaborating}
+            hasApiKey={hasApiKey}
+            onClear={handleClear}
+            onCopy={handleCopy}
+            onElaborate={handleElaborate}
+          />
+        </motion.div>
+      </div>
+    </>
   );
 };
 
