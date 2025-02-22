@@ -32,6 +32,7 @@ const Index = () => {
           .maybeSingle();
         
         if (error) throw error;
+        console.log(data.amount)
         setCredits(data?.amount ?? 0);
       } catch (error) {
         console.error('Error fetching credits:', error);
