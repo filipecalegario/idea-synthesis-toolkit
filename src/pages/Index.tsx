@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { CombinationTable } from "@/components/CombinationTable";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,6 @@ const Index = () => {
           throw new Error('No session found');
         }
 
-        // Use Supabase functions.invoke instead of fetch
         const { data, error } = await supabase.functions.invoke('check-api-key');
         if (error) throw error;
         setHasApiKey(data.hasKey);
@@ -155,17 +153,11 @@ const Index = () => {
     setElaboration("");
 
     try {
-      const response = await fetch('/functions/v1/elaborate-combination', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ combination }),
+      const { data, error } = await supabase.functions.invoke('elaborate-combination', {
+        body: { combination },
       });
 
-      if (!response.ok) throw new Error('Failed to get elaboration');
-
-      const data = await response.json();
+      if (error) throw error;
       setElaboration(data.elaboration);
       toast.success("Elaboration generated!");
     } catch (error) {
