@@ -47,6 +47,10 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
     setEditingCell(null);
   };
 
+  const handleCheckboxChange = (categoryIndex: number, optionIndex: number, checked: boolean) => {
+    onOptionSelect(categoryIndex, optionIndex);
+  };
+
   return (
     <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
       <table className="w-full">
@@ -82,7 +86,8 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
                     <div className="absolute right-1 top-1">
                       <Checkbox
                         checked={isSelected}
-                        onCheckedChange={() => onOptionSelect(categoryIndex, optionIndex)}
+                        onCheckedChange={(checked) => handleCheckboxChange(categoryIndex, optionIndex, checked as boolean)}
+                        className="hover:border-primary"
                       />
                     </div>
                     <div
@@ -119,4 +124,3 @@ export const CombinationTable: React.FC<CombinationTableProps> = ({
     </div>
   );
 };
-
