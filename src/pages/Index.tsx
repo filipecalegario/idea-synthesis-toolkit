@@ -1,17 +1,17 @@
+
 import React, { useState, useEffect } from "react";
 import { CombinationTable } from "@/components/CombinationTable";
-import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { CategoryInput } from "@/components/CategoryInput";
+import { CombinationDisplay } from "@/components/CombinationDisplay";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Copy, ChevronUp, ChevronDown, Wand2, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Category {
-  name: string;
-  options: string[];
-}
+import { Category } from "@/types/categories";
+import { parseTextInput, generateCombination } from "@/utils/combinationUtils";
 
 const Index = () => {
   const [textInput, setTextInput] = useState("");
@@ -41,21 +41,6 @@ const Index = () => {
     
     checkApiKey();
   }, []);
-
-  const parseTextInput = (input: string) => {
-    const lines = input.trim().split("\n");
-    return lines
-      .map((line) => {
-        const [name, optionsStr] = line.split(":");
-        if (!name || !optionsStr) return null;
-        const options = optionsStr
-          .split(",")
-          .map((opt) => opt.trim())
-          .filter((opt) => opt);
-        return { name: name.trim(), options };
-      })
-      .filter((cat): cat is Category => cat !== null && cat.options.length > 0);
-  };
 
   useEffect(() => {
     const newCategories = parseTextInput(textInput);
@@ -108,37 +93,21 @@ const Index = () => {
     });
   };
 
-  const generateCombination = () => {
-    return categories
-      .map((cat, index) => {
-        const selectedIndices = selectedOptions[index] || [];
-        return selectedIndices.length > 0
-          ? selectedIndices.map(idx => cat.options[idx]).join(" & ")
-          : null;
-      })
-      .filter(Boolean)
-      .join(" + ");
-  };
-
   const handleClear = () => {
     setSelectedOptions({});
     toast.success("Selection cleared");
   };
 
   const handleCopy = () => {
-    const combination = generateCombination();
+    const combination = generateCombination(categories, selectedOptions);
     if (combination) {
       navigator.clipboard.writeText(combination);
       toast.success("Copied to clipboard");
     }
   };
 
-  const toggleInputVisibility = () => {
-    setIsInputVisible(!isInputVisible);
-  };
-
   const handleElaborate = async () => {
-    const combination = generateCombination();
+    const combination = generateCombination(categories, selectedOptions);
     if (!combination) {
       toast.error("Please select options to elaborate on");
       return;
@@ -197,44 +166,12 @@ const Index = () => {
         )}
 
         <div className="grid gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Categories & Options</h2>
-              <Button variant="outline" size="sm" onClick={toggleInputVisibility}>
-                {isInputVisible ? (
-                  <>
-                    <ChevronUp className="mr-2 h-4 w-4" /> Hide Input
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="mr-2 h-4 w-4" /> Show Input
-                  </>
-                )}
-              </Button>
-            </div>
-            <AnimatePresence>
-              {isInputVisible && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <div className="textarea-container">
-                    <textarea
-                      value={textInput}
-                      onChange={handleTextChange}
-                      placeholder="Enter categories and options in the format:
-CATEGORY 1: OPTION 1A, OPTION 1B, OPTION 1C
-CATEGORY 2: OPTION 2A, OPTION 2B, OPTION 2C"
-                      className="min-h-[400px]"
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <CategoryInput
+            textInput={textInput}
+            isInputVisible={isInputVisible}
+            onTextChange={handleTextChange}
+            onToggleVisibility={() => setIsInputVisible(!isInputVisible)}
+          />
 
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">Combination Table</h2>
@@ -248,42 +185,15 @@ CATEGORY 2: OPTION 2A, OPTION 2B, OPTION 2C"
           </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-6 shadow-sm space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Generated Combination</h2>
-            <div className="space-x-2">
-              <Button variant="outline" onClick={handleClear} size="sm">
-                Clear Selection
-              </Button>
-              <Button variant="outline" onClick={handleCopy} size="sm">
-                <Copy className="mr-2 h-4 w-4" />
-                Copy
-              </Button>
-            </div>
-          </div>
-          <p className="combination-text">{generateCombination() || "Select options to generate a combination"}</p>
-          
-          <div className="pt-4 border-t">
-            <Button 
-              onClick={handleElaborate} 
-              disabled={isElaborating} 
-              className="w-full"
-            >
-              <Wand2 className="mr-2 h-4 w-4" />
-              {isElaborating ? "Elaborating..." : "Elaborate with AI"}
-            </Button>
-            
-            {elaboration && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-4 bg-secondary/50 rounded-lg"
-              >
-                <p className="text-base text-muted-foreground italic">{elaboration}</p>
-              </motion.div>
-            )}
-          </div>
-        </div>
+        <CombinationDisplay
+          combination={generateCombination(categories, selectedOptions)}
+          elaboration={elaboration}
+          isElaborating={isElaborating}
+          hasApiKey={hasApiKey}
+          onClear={handleClear}
+          onCopy={handleCopy}
+          onElaborate={handleElaborate}
+        />
       </motion.div>
     </div>
   );
