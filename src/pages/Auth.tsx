@@ -15,22 +15,11 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
 
-  const createInitialCredits = async (userId: string) => {
-    const { error } = await supabase
-      .from('credits')
-      .insert([{ user_id: userId, amount: 10 }]);
-      
-    if (error) {
-      console.error('Error creating initial credits:', error);
-      toast.error("Failed to set up initial credits");
-    }
-  };
-
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -38,9 +27,6 @@ const Auth = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      if (data.user) {
-        await createInitialCredits(data.user.id);
-      }
       toast.success("Check your email to confirm your account!");
     }
     setLoading(false);
@@ -153,4 +139,3 @@ const Auth = () => {
 };
 
 export default Auth;
-

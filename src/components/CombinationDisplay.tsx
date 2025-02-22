@@ -3,14 +3,12 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Wand2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CombinationDisplayProps {
   combination: string;
   elaboration: string;
   isElaborating: boolean;
   hasApiKey: boolean | null;
-  credits: number | null;
   onClear: () => void;
   onCopy: () => void;
   onElaborate: () => void;
@@ -21,7 +19,6 @@ export const CombinationDisplay: React.FC<CombinationDisplayProps> = ({
   elaboration,
   isElaborating,
   hasApiKey,
-  credits,
   onClear,
   onCopy,
   onElaborate,
@@ -43,25 +40,9 @@ export const CombinationDisplay: React.FC<CombinationDisplayProps> = ({
       <p className="combination-text">{combination || "Select options to generate a combination"}</p>
       
       <div className="pt-4 border-t">
-        {credits !== null && credits < 1 && (
-          <Alert className="mb-4 bg-yellow-50">
-            <AlertDescription>
-              You have run out of credits. Please contact support to get more credits.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {credits !== null && credits <= 3 && credits > 0 && (
-          <Alert className="mb-4 bg-yellow-50">
-            <AlertDescription>
-              You have {credits} credit{credits === 1 ? '' : 's'} remaining.
-            </AlertDescription>
-          </Alert>
-        )}
-
         <Button 
           onClick={onElaborate} 
-          disabled={isElaborating || (credits !== null && credits < 1)} 
+          disabled={isElaborating} 
           className="w-full"
         >
           <Wand2 className="mr-2 h-4 w-4" />

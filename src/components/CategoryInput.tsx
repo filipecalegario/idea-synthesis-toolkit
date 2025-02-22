@@ -11,33 +11,33 @@ interface CategoryInputProps {
   onToggleVisibility: () => void;
 }
 
-const EXAMPLE_1 = `Support: Wheels, Track, Air cushion, Slides, Pedipulators
-Propulsion: Driven wheels, Air thrust, Moving cable, Linear induction
-Power: Electric, Petrol, Diesel, Bottled gas, Steam
-Transmission: Gears and shafts, Belts, Chains, Hydraulic, Flexible cable
-Steering: Turning wheels, Air thrust, Rails
-Stopping: Brakes, Reverse thrust, Ratchet
-Lifting: Hydraulic ram, Rack and pinion, Screw, Chain or rope hoist
-Operator: Seated at front, Seated at rear, Standing, Walking, Remote control`;
+const EXAMPLE_1 = `SUPPORT: WHEELS, TRACK, AIR CUSHION, SLIDES, PEDIPULATORS
+PROPULSION: DRIVEN WHEELS, AIR THRUST, MOVING CABLE, LINEAR INDUCTION
+POWER: ELECTRIC, PETROL, DIESEL, BOTTLED GAS, STEAM
+TRANSMISSION: GEARS AND SHAFTS, BELTS, CHAINS, HYDRAULIC, FLEXIBLE CABLE
+STEERING: TURNING WHEELS, AIR THRUST, RAILS
+STOPPING: BRAKES, REVERSE THRUST, RATCHET
+LIFTING: HYDRAULIC RAM, RACK AND PINION, SCREW, CHAIN OR ROPE HOIST
+OPERATOR: SEATED AT FRONT, SEATED AT REAR, STANDING, WALKING, REMOTE CONTROL`;
 
-const EXAMPLE_2 = `Instrument type: String, Wind, Percussion, Electronic  
-Control gesture: Plucking, Bowing, Striking, Blowing, Pressing  
-Posture: Seated, Standing, Moving, Static  
-Sound modulation: Pitch bending, Vibrato, Dynamics control, Filtering  
-Interaction method: Hands, Feet, Body movement, Breath, Digital interface  
-Material: Wood, Metal, Synthetic, Mixed  
-Musical context: Classical, Jazz, Rock, Electronic, Folk  `;
+const EXAMPLE_2 = `INSTRUMENT TYPE: STRING, WIND, PERCUSSION, ELECTRONIC  
+CONTROL GESTURE: PLUCKING, BOWING, STRIKING, BLOWING, PRESSING  
+POSTURE: SEATED, STANDING, MOVING, STATIC  
+SOUND MODULATION: PITCH BENDING, VIBRATO, DYNAMICS CONTROL, FILTERING  
+INTERACTION METHOD: HANDS, FEET, BODY MOVEMENT, BREATH, DIGITAL INTERFACE  
+MATERIAL: WOOD, METAL, SYNTHETIC, MIXED  
+MUSICAL CONTEXT: CLASSICAL, JAZZ, ROCK, ELECTRONIC, FOLK  `;
 
-const EXAMPLE_3 = `Input: Text, Image, Audio, Video, Sensor data, Code, Multimodal
-Model: Gpt, Bert, Llama, Mixture of experts, Custom fine-tuned, Hybrid models
-Processing: Few-shot learning, Zero-shot learning, Prompt engineering, Embedding search, Fine-tuning, Reinforcement learning
-Generation mode: Token-by-token, Batch processing, Parallel generation, Cascade models
-Output: Text, Image, Audio, Video, Code, Structured data, Multimodal
-Deployment: Cloud, Edge, On-premise, Hybrid
-Interface: Chatbot, Api, Dashboard, Mobile app, Browser extension, Embedded system
-Personalization: Static prompts, Context memory, Adaptive learning, User fine-tuning, Profile-based adaptation
-Ethical constraints: Content filtering, Bias mitigation, User monitoring, Transparency reporting, Human-in-the-loop
-Security: Data encryption, User authentication, Api rate limiting, Model access control, Audit logs`;
+const EXAMPLE_3 = `INPUT: TEXT, IMAGE, AUDIO, VIDEO, SENSOR DATA, CODE, MULTIMODAL
+MODEL: GPT, BERT, LLAMA, MIXTURE OF EXPERTS, CUSTOM FINE-TUNED, HYBRID MODELS
+PROCESSING: FEW-SHOT LEARNING, ZERO-SHOT LEARNING, PROMPT ENGINEERING, EMBEDDING SEARCH, FINE-TUNING, REINFORCEMENT LEARNING
+GENERATION MODE: TOKEN-BY-TOKEN, BATCH PROCESSING, PARALLEL GENERATION, CASCADE MODELS
+OUTPUT: TEXT, IMAGE, AUDIO, VIDEO, CODE, STRUCTURED DATA, MULTIMODAL
+DEPLOYMENT: CLOUD, EDGE, ON-PREMISE, HYBRID
+INTERFACE: CHATBOT, API, DASHBOARD, MOBILE APP, BROWSER EXTENSION, EMBEDDED SYSTEM
+PERSONALIZATION: STATIC PROMPTS, CONTEXT MEMORY, ADAPTIVE LEARNING, USER FINE-TUNING, PROFILE-BASED ADAPTATION
+ETHICAL CONSTRAINTS: CONTENT FILTERING, BIAS MITIGATION, USER MONITORING, TRANSPARENCY REPORTING, HUMAN-IN-THE-LOOP
+SECURITY: DATA ENCRYPTION, USER AUTHENTICATION, API RATE LIMITING, MODEL ACCESS CONTROL, AUDIT LOGS`;
 
 export const CategoryInput: React.FC<CategoryInputProps> = ({
   textInput,
