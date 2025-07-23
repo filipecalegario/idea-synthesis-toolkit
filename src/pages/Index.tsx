@@ -130,27 +130,47 @@ const Index = () => {
         return;
       }
 
-      // Generate a creative elaboration based on the combination
-      const elaborationTemplates = [
-        `This fascinating combination of ${combination} creates a unique fusion that blends traditional elements with innovative approaches. The synergy between these components opens up exciting possibilities for creative expression and artistic exploration.`,
-        `The intriguing mix of ${combination} represents a bold experiment in creative synthesis. This combination challenges conventional boundaries and offers fresh perspectives on how different elements can work together harmoniously.`,
-        `By combining ${combination}, we discover an unexpected harmony that showcases the beauty of creative diversity. This innovative blend demonstrates how contrasting elements can complement each other to create something entirely new.`,
-        `The creative potential of ${combination} lies in its ability to bridge different worlds and create meaningful connections. This unique combination offers a fresh take on traditional concepts while maintaining their essential characteristics.`,
-        `This dynamic combination of ${combination} exemplifies the power of creative thinking and artistic innovation. The interplay between these elements creates rich textures and layers that invite deeper exploration and interpretation.`
-      ];
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a creative writing assistant that helps users elaborate on creative combinations. When given a combination of concepts, elements, or ideas, you should provide an insightful, imaginative, and detailed elaboration that explores the creative potential, synergies, and unique aspects of that combination. Your response should be engaging, thoughtful, and inspire further creative thinking.'
+            },
+            {
+              role: 'user',
+              content: `Please elaborate on this creative combination: ${combination}`
+            }
+          ],
+          max_tokens: 300,
+          temperature: 0.7
+        })
+      });
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
+      }
 
-      // Select a random template
-      const randomTemplate = elaborationTemplates[Math.floor(Math.random() * elaborationTemplates.length)];
+      const data = await response.json();
+      const elaboratedText = data.choices[0]?.message?.content;
+
+      if (!elaboratedText) {
+        throw new Error('No elaboration received from OpenAI');
+      }
 
       // Simulate credit deduction
       if (credits !== null && credits > 0) {
         setCredits((prev) => (prev !== null ? prev - 1 : null));
       }
 
-      setElaboration(randomTemplate);
+      setElaboration(elaboratedText);
       toast.success("Elaboration generated!");
     } catch (error) {
       console.error('Error elaborating combination:', error);
