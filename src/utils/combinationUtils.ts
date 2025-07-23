@@ -24,9 +24,9 @@ export const generateCombination = (
     .map((cat, index) => {
       const selectedIndices = selectedOptions[index] || [];
       return selectedIndices.length > 0
-        ? selectedIndices.map(idx => cat.options[idx]).join(" & ")
+        ? `${cat.name}: ${selectedIndices.map(idx => cat.options[idx]).join(", ")}`
         : null;
     })
     .filter(Boolean)
-    .join(" + ");
+    .join(" | ");
 };
