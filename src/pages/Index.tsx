@@ -21,27 +21,6 @@ const Index = () => {
   const [isElaborating, setIsElaborating] = useState(false);
   const [elaboration, setElaboration] = useState<string>("");
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
-  const [credits, setCredits] = useState<number | null>(null);
-
-  useEffect(() => {
-    const fetchCredits = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('credits')
-          .select('amount')
-          .maybeSingle();
-        
-        if (error) throw error;
-        console.log(data.amount)
-        setCredits(data?.amount ?? 0);
-      } catch (error) {
-        console.error('Error fetching credits:', error);
-        toast.error("Failed to fetch credits");
-      }
-    };
-
-    fetchCredits();
-  }, []);
 
   useEffect(() => {
     const checkApiKey = () => {
@@ -114,11 +93,6 @@ const Index = () => {
       return;
     }
 
-    if (credits !== null && credits < 1) {
-      toast.error("You don't have enough credits to elaborate");
-      return;
-    }
-
     setIsElaborating(true);
     setElaboration("");
 
@@ -165,11 +139,6 @@ const Index = () => {
         throw new Error('No elaboration received from OpenAI');
       }
 
-      // Simulate credit deduction
-      if (credits !== null && credits > 0) {
-        setCredits((prev) => (prev !== null ? prev - 1 : null));
-      }
-
       setElaboration(elaboratedText);
       toast.success("Elaboration generated!");
     } catch (error) {
@@ -195,16 +164,11 @@ const Index = () => {
               <h1 className="text-4xl font-bold tracking-tight">Creative Combination Tool</h1>
               <p className="mt-2 text-muted-foreground">Create unique combinations from your categories and options</p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-muted-foreground">
-                Credits: {credits ?? '...'}
-              </div>
-              <Link to="/project-settings">
-                <Button variant="outline" size="icon">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+            <Link to="/project-settings">
+              <Button variant="outline" size="icon">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
 
           {hasApiKey === false && (
@@ -243,7 +207,6 @@ const Index = () => {
             onClear={handleClear}
             onCopy={handleCopy}
             onElaborate={handleElaborate}
-            credits={credits}
           />
         </motion.div>
       </div>
