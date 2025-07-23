@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast, Toaster } from "sonner";
 import { motion } from "framer-motion";
-import { ArrowLeft, LogOut, Pencil, Trash2 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -13,20 +13,10 @@ const ProjectSettings = () => {
   const [apiKey, setApiKey] = useState("");
   const [hasApiKey, setHasApiKey] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     checkApiKey();
-    getUserEmail();
   }, []);
-
-  const getUserEmail = async () => {
-    const { data: { session }} = await supabase.auth.getSession();
-    if (session?.user?.email) {
-      setUserEmail(session.user.email);
-    }
-  };
 
   const checkApiKey = async () => {
     try {
@@ -43,11 +33,6 @@ const ProjectSettings = () => {
     e.preventDefault();
     
     try {
-      const { data: { session }} = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error('No session found');
-      }
-
       const { data, error } = await supabase.functions.invoke('set-api-key', {
         body: { apiKey }
       });
@@ -82,17 +67,6 @@ const ProjectSettings = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success("Signed out successfully");
-      navigate("/auth");
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast.error("Failed to sign out");
-    }
-  };
-
   return (
     <>
       <Toaster richColors position="top-center" />
@@ -103,27 +77,18 @@ const ProjectSettings = () => {
           transition={{ duration: 0.5 }}
           className="space-y-8"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
-                <p className="text-muted-foreground">
-                  {userEmail ? `Logged in as ${userEmail}` : 'Loading...'}
-                </p>
-              </div>
+          <div className="flex items-center gap-4">
+            <Link to="/">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Project Settings</h1>
+              <p className="text-muted-foreground">
+                Manage your project configuration
+              </p>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={handleSignOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
           </div>
 
           <div className="space-y-6">
