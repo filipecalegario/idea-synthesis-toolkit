@@ -130,11 +130,35 @@ const Index = () => {
         return;
       }
 
-      const { data, error: elaborateError } = await supabase.functions.invoke('elaborate-combination', {
-        body: { combination, apiKey },
+      // Call OpenAI directly from frontend
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4.1-2025-04-14',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful assistant that elaborates on creative combinations in 2-3 engaging sentences.'
+            },
+            {
+              role: 'user',
+              content: `Please elaborate on this creative combination: ${combination}`
+            }
+          ],
+          temperature: 0.7,
+        }),
       });
 
-      if (elaborateError) throw elaborateError;
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('OpenAI API error:', data);
+        throw new Error(data.error?.message || 'Failed to get elaboration from OpenAI');
+      }
 
       // Update credits after successful elaboration
       const { error: updateError } = await supabase
@@ -145,7 +169,7 @@ const Index = () => {
       if (updateError) throw updateError;
 
       setCredits((prev) => (prev !== null ? prev - 1 : null));
-      setElaboration(data.elaboration);
+      setElaboration(data.choices[0].message.content.trim());
       toast.success("Elaboration generated!");
     } catch (error) {
       console.error('Error elaborating combination:', error);
