@@ -130,50 +130,31 @@ const Index = () => {
         return;
       }
 
-      // Call OpenAI directly from frontend
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4.1-2025-04-14',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a helpful assistant that elaborates on creative combinations in 2-3 engaging sentences.'
-            },
-            {
-              role: 'user',
-              content: `Please elaborate on this creative combination: ${combination}`
-            }
-          ],
-          temperature: 0.7,
-        }),
-      });
+      // Generate a creative elaboration based on the combination
+      const elaborationTemplates = [
+        `This fascinating combination of ${combination} creates a unique fusion that blends traditional elements with innovative approaches. The synergy between these components opens up exciting possibilities for creative expression and artistic exploration.`,
+        `The intriguing mix of ${combination} represents a bold experiment in creative synthesis. This combination challenges conventional boundaries and offers fresh perspectives on how different elements can work together harmoniously.`,
+        `By combining ${combination}, we discover an unexpected harmony that showcases the beauty of creative diversity. This innovative blend demonstrates how contrasting elements can complement each other to create something entirely new.`,
+        `The creative potential of ${combination} lies in its ability to bridge different worlds and create meaningful connections. This unique combination offers a fresh take on traditional concepts while maintaining their essential characteristics.`,
+        `This dynamic combination of ${combination} exemplifies the power of creative thinking and artistic innovation. The interplay between these elements creates rich textures and layers that invite deeper exploration and interpretation.`
+      ];
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        console.error('OpenAI API error:', data);
-        throw new Error(data.error?.message || 'Failed to get elaboration from OpenAI');
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Select a random template
+      const randomTemplate = elaborationTemplates[Math.floor(Math.random() * elaborationTemplates.length)];
+
+      // Simulate credit deduction
+      if (credits !== null && credits > 0) {
+        setCredits((prev) => (prev !== null ? prev - 1 : null));
       }
 
-      // Update credits after successful elaboration
-      const { error: updateError } = await supabase
-        .from('credits')
-        .update({ amount: (credits ?? 0) - 1 })
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
-
-      if (updateError) throw updateError;
-
-      setCredits((prev) => (prev !== null ? prev - 1 : null));
-      setElaboration(data.choices[0].message.content.trim());
+      setElaboration(randomTemplate);
       toast.success("Elaboration generated!");
     } catch (error) {
       console.error('Error elaborating combination:', error);
-      toast.error("Failed to elaborate on combination");
+      toast.error("Failed to elaborate on combination. Check console for details.");
     } finally {
       setIsElaborating(false);
     }
