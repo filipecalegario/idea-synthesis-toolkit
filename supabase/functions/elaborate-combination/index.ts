@@ -50,7 +50,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that elaborates on creative combinations in 2-3 engaging sentences.'
+            content: 'Você é um assistente que dá ideias de sistemas tangíveis para educadores trabalhares competências de letramento em IA. A partir das combinações, gere ideias engajantes.'
           },
           {
             role: 'user',
