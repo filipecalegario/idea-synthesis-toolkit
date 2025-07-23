@@ -44,16 +44,10 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    const checkApiKey = async () => {
+    const checkApiKey = () => {
       try {
-        const { data: { session }} = await supabase.auth.getSession();
-        if (!session?.access_token) {
-          throw new Error('No session found');
-        }
-
-        const { data, error } = await supabase.functions.invoke('check-api-key');
-        if (error) throw error;
-        setHasApiKey(data.hasKey);
+        const storedApiKey = localStorage.getItem('openai-api-key');
+        setHasApiKey(!!storedApiKey);
       } catch (error) {
         console.error('Error checking API key:', error);
         setHasApiKey(false);
@@ -129,8 +123,15 @@ const Index = () => {
     setElaboration("");
 
     try {
+      const apiKey = localStorage.getItem('openai-api-key');
+      if (!apiKey) {
+        toast.error("OpenAI API key not found in local storage");
+        setIsElaborating(false);
+        return;
+      }
+
       const { data, error: elaborateError } = await supabase.functions.invoke('elaborate-combination', {
-        body: { combination },
+        body: { combination, apiKey },
       });
 
       if (elaborateError) throw elaborateError;

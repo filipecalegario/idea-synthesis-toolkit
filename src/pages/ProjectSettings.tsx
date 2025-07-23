@@ -6,7 +6,6 @@ import { toast, Toaster } from "sonner";
 import { motion } from "framer-motion";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ProjectSettings = () => {
@@ -18,27 +17,26 @@ const ProjectSettings = () => {
     checkApiKey();
   }, []);
 
-  const checkApiKey = async () => {
+  const checkApiKey = () => {
     try {
-      const { data, error } = await supabase.functions.invoke('check-api-key');
-      if (error) throw error;
-      setHasApiKey(data.hasKey);
+      const storedApiKey = localStorage.getItem('openai-api-key');
+      setHasApiKey(!!storedApiKey);
     } catch (error) {
       console.error('Error checking API key:', error);
       toast.error("Failed to check API key status");
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const { data, error } = await supabase.functions.invoke('set-api-key', {
-        body: { apiKey }
-      });
+      if (!apiKey.trim()) {
+        toast.error("API key cannot be empty");
+        return;
+      }
 
-      if (error) throw error;
-
+      localStorage.setItem('openai-api-key', apiKey);
       toast.success(isEditing ? "API key updated successfully!" : "API key saved successfully!");
       setApiKey("");
       setIsEditing(false);
@@ -49,14 +47,9 @@ const ProjectSettings = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     try {
-      const { error } = await supabase.functions.invoke('set-api-key', {
-        body: { apiKey: null }
-      });
-
-      if (error) throw error;
-
+      localStorage.removeItem('openai-api-key');
       toast.success("API key deleted successfully!");
       setHasApiKey(false);
       setIsEditing(false);
@@ -99,7 +92,7 @@ const ProjectSettings = () => {
                 <div className="space-y-4">
                   <Alert className="bg-[#F2FCE2]">
                     <AlertDescription>
-                      Your OpenAI API key is securely stored. You can edit or delete it using the buttons below.
+                      Your OpenAI API key is stored in your browser's local storage. You can edit or delete it using the buttons below.
                     </AlertDescription>
                   </Alert>
                   <div className="flex gap-2">
@@ -125,7 +118,7 @@ const ProjectSettings = () => {
                       onChange={(e) => setApiKey(e.target.value)}
                     />
                     <p className="text-sm text-muted-foreground">
-                      Your API key is stored securely and used for AI elaboration features.
+                      Your API key is stored in your browser's local storage and used for AI elaboration features.
                     </p>
                   </div>
                   <div className="flex gap-2">

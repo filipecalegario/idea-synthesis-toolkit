@@ -32,25 +32,17 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) throw new Error('Invalid user token');
 
-    // Get the user's API key from secrets
-    const { data: secretData, error: secretError } = await supabaseClient
-      .from('secrets')
-      .select('key_value')
-      .eq('user_id', user.id)
-      .eq('key_name', 'OPENAI_API_KEY')
-      .single();
+    const { combination, apiKey } = await req.json();
 
-    if (secretError || !secretData?.key_value) {
-      throw new Error('OpenAI API key not found');
+    if (!apiKey) {
+      throw new Error('OpenAI API key is required');
     }
-
-    const { combination } = await req.json();
     
     // Make request to OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${secretData.key_value}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
